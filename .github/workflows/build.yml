@@ -4,68 +4,68 @@ permissions:
   contents: write
   actions: write
 
-on:
+于:
   workflow_call:
     inputs:
       # ==================== 基础配置 ====================
       android_version:
         required: true
-        type: string
+        输入: string
       kernel_version:
         required: true
-        type: string
+        输入: string
       sub_level:
         required: true
-        type: string
+        输入: string
       os_patch_level:
         required: true
-        type: string
+        输入: string
 
       # ==================== KernelSU 配置 ====================
       ksu_variant:
         required: true
-        type: string
+        输入: string
       ksu_branch:
         required: true
-        type: string
+        输入: string
 
       # ==================== 可选配置 ====================
       version:
         required: false
-        type: string
+        输入: string
       revision:
         required: false
-        type: string
+        输入: string
       build_time:
         required: false
-        type: string
-        default: "Sun Dec 01 08:10:00 UTC 2024"
+        输入: string
+        默认: "Sun Dec 01 08:10:00 UTC 2024"
 
       # ==================== 功能开关 ====================
       use_zram:
         required: true
-        type: boolean
-        default: true
+        输入: boolean
+        默认: true
       use_bbg:
         required: true
-        type: boolean
-        default: true
+        输入: boolean
+        默认: true
       use_kpm:
         required: true
-        type: boolean
-        default: true
+        输入: boolean
+        默认: true
       use_rekernel:
         required: false
-        type: boolean
-        default: false
+        输入: boolean
+        默认: false
       enable_susfs:
         required: true
-        type: boolean
-        default: true
+        输入: boolean
+        默认: true
       supp_op:
         required: false
-        type: boolean
-        default: false
+        输入: boolean
+        默认: false
 
 jobs:
   build-kernel:
@@ -872,6 +872,26 @@ jobs:
           CONFIG_KSU_SUSFS_OPEN_REDIRECT=y
           CONFIG_KSU_SUSFS_SUS_MAP=y
           EOF
+
+      - name: 注入DroidSpaces配置
+        run: |
+          cd "$KERNEL_ROOT"
+          cd ./common
+          # 打ABI补丁
+          wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/refs/heads/main/Documentation/resources/kernel-patches/GKI/below-kernel-6.12/001.GKI-below-6.12-fix_sysvipc_kabi_3_4_5.patch
+          patch -p1 < 001.GKI-below-6.12-fix_sysvipc_kabi_3_4_5.patch
+          cd ../
+          echo "CONFIG_SYSCTL=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_SYSVIPC=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_POSIX_MQUEUE=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_NAMESPACES=y" >> ./common/arch/arm64/configs/gki_defconfig  
+          echo "CONFIG_PID_NS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_IPC_NS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_UTS_NS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_USER_NS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_DEVTMPFS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_DEVTMPFS_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+      
 
       - name: 配置内核名称
         working-directory: ${{ env.KERNEL_ROOT }}
