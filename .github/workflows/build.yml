@@ -892,7 +892,7 @@ jobs:
           echo "CONFIG_DEVTMPFS=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_DEVTMPFS_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
 
-           - name: 修改内核版本名称
+     - name: 修改内核版本名称
         run: |
           cd "$KERNEL_ROOT"
           CUSTOM_SUFFIX="Sp1ke@Droidspaces-Support"
